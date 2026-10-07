@@ -15,7 +15,11 @@ export default function UserCard({ user }) {
   const [connId, setConnId] = useState(null);
 
   useEffect(() => {
-    if (currentUser?.id === user.id) {
+    if (!currentUser) {
+      setLoading(false);
+      return;
+    }
+    if (currentUser.id === user.id) {
       setLoading(false);
       return;
     }
@@ -31,6 +35,9 @@ export default function UserCard({ user }) {
 
   const handleConnect = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
+    if (!currentUser) return;
+    
     if (connStatus === 'NONE') {
       try {
         setLoading(true);
@@ -59,6 +66,8 @@ export default function UserCard({ user }) {
 
   const handleAiIcebreaker = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
+    if (!currentUser) return;
     try {
       setAiLoading(true);
       const res = await aiApi.getIcebreaker(user.id);
@@ -150,7 +159,7 @@ export default function UserCard({ user }) {
           )}
 
           <div style={{ marginTop: 16, display: 'flex', gap: '8px' }}>
-            {currentUser?.id !== user.id && !loading && (
+            {currentUser && currentUser.id !== user.id && !loading && (
               <>
                 <button 
                   className={`btn ${connStatus === 'ACCEPTED' ? 'btn-secondary' : connStatus === 'PENDING' ? 'btn-secondary' : 'btn-primary'}`} 
