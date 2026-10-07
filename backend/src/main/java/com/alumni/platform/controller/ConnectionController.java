@@ -93,4 +93,59 @@ public class ConnectionController {
 
         return ResponseEntity.ok(Map.of("status", "NONE"));
     }
+
+    @GetMapping("/my/accepted")
+    public ResponseEntity<?> getAcceptedConnections(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        List<Connection> sent = connectionRepository.findByRequesterAndStatus(user, ConnectionStatus.ACCEPTED);
+        List<Connection> received = connectionRepository.findByRecipientAndStatus(user, ConnectionStatus.ACCEPTED);
+
+        List<Map<String, Object>> connections = new java.util.ArrayList<>();
+        for (Connection c : sent) {
+            connections.add(Map.of("connectionId", c.getId(), "user", userToMap(c.getRecipient()), "since", c.getCreatedAt().toString()));
+        }
+        for (Connection c : received) {
+            connections.add(Map.of("connectionId", c.getId(), "user", userToMap(c.getRequester()), "since", c.getCreatedAt().toString()));
+        }
+        return ResponseEntity.ok(connections);
+    }
+
+    @GetMapping("/my/pending")
+    public ResponseEntity<?> getPendingConnections(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        List<Connection> incoming = connectionRepository.findByRecipientAndStatus(user, ConnectionStatus.PENDING);
+
+        List<Map<String, Object>> requests = new java.util.ArrayList<>();
+        for (Connection c : incoming) {
+            requests.add(Map.of("connectionId", c.getId(), "user", userToMap(c.getRequester()), "requestedAt", c.getCreatedAt().toString()));
+        }
+        return ResponseEntity.ok(requests);
+    }
+
+    @GetMapping("/my/sent")
+    public ResponseEntity<?> getSentConnections(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        List<Connection> sent = connectionRepository.findByRequesterAndStatus(user, ConnectionStatus.PENDING);
+
+        List<Map<String, Object>> requests = new java.util.ArrayList<>();
+        for (Connection c : sent) {
+            requests.add(Map.of("connectionId", c.getId(), "user", userToMap(c.getRecipient()), "sentAt", c.getCreatedAt().toString()));
+        }
+        return ResponseEntity.ok(requests);
+    }
+
+    private Map<String, Object> userToMap(User u) {
+        java.util.Map<String, Object> map = new java.util.HashMap<>();
+        map.put("id", u.getId());
+        map.put("firstName", u.getFirstName());
+        map.put("lastName", u.getLastName());
+        map.put("email", u.getEmail());
+        map.put("jobTitle", u.getJobTitle());
+        map.put("company", u.getCompany());
+        map.put("department", u.getDepartment());
+        map.put("profilePicture", u.getProfilePicture());
+        map.put("bio", u.getBio());
+        map.put("role", u.getRole() != null ? u.getRole().name() : null);
+        return map;
+    }
 }

@@ -22,4 +22,7 @@ public interface ConnectionRepository extends JpaRepository<Connection, Long> {
     List<Connection> findPendingRequestsForUser(User user);
     
     boolean existsByRequesterAndRecipient(User requester, User recipient);
+
+    List<Connection> findByRequesterAndStatus(User requester, ConnectionStatus status);
+    List<Connection> findByRecipientAndStatus(User recipient, ConnectionStatus status);
 }
