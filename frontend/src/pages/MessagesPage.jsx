@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { MessageCircle, Send, ArrowLeft, Inbox } from 'lucide-react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { MessageCircle, Send, Inbox } from 'lucide-react';
 import { messagesApi, usersApi } from '../services/api';
 import { AvatarInitials } from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 
 export default function MessagesPage() {
   const { userId } = useParams();
+  const navigate = useNavigate();
   const { user: currentUser } = useAuth();
   const [inbox, setInbox] = useState([]);
   const [messages, setMessages] = useState([]);
@@ -21,16 +22,17 @@ export default function MessagesPage() {
   useEffect(() => {
     loadInbox();
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
+    if (pollRef.current) clearInterval(pollRef.current);
     if (userId) {
       loadConversation(userId);
-      // Poll for new messages every 3 seconds
-      if (pollRef.current) clearInterval(pollRef.current);
-      pollRef.current = setInterval(() => loadConversation(userId, true), 3000);
+      pollRef.current = setInterval(() => loadConversation(userId, true), 4000);
     }
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   useEffect(() => {
@@ -40,7 +42,11 @@ export default function MessagesPage() {
   const loadInbox = async () => {
     try {
       const res = await messagesApi.getInbox();
-      setInbox(res.data);
+      const list = res.data || [];
+      setInbox(list);
+      if (currentUser && (!userId || String(userId) === String(currentUser.id)) && list.length > 0) {
+        navigate(`/messages/${list[0].userId}`, { replace: true });
+      }
     } catch (err) { console.error(err); }
     setLoading(false);
   };
@@ -51,25 +57,33 @@ export default function MessagesPage() {
         messagesApi.getConversation(id),
         usersApi.getById(id),
       ]);
-      setMessages(msgRes.data);
+      setMessages(msgRes.data || []);
       setChatUser(userRes.data);
       if (!silent) loadInbox();
     } catch (err) { console.error(err); }
   };
 
+  const isSelf = currentUser && String(userId) === String(currentUser.id);
+
   const handleSend = async (e) => {
-    e.preventDefault();
-    if (!newMessage.trim() || !userId) return;
+    if (e && e.preventDefault) e.preventDefault();
+    if (isSelf) {
+      toast.error('Cannot message yourself');
+      return;
+    }
+    const content = (newMessage || '').trim();
+    if (!content || !userId) return;
     setSending(true);
     try {
-      await messagesApi.send(userId, newMessage.trim());
+      await messagesApi.send(userId, content);
       setNewMessage('');
       loadConversation(userId, true);
       loadInbox();
     } catch (err) {
-      toast.error('Failed to send message');
+      toast.error(err.response?.data?.error || err.response?.data?.message || 'Failed to send message');
+    } finally {
+      setSending(false);
     }
-    setSending(false);
   };
 
   const formatTime = (dateStr) => {
@@ -82,10 +96,17 @@ export default function MessagesPage() {
     return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
   };
 
+  const makeAvatarUser = (data) => ({
+    id: data.userId || data.id,
+    firstName: data.firstName,
+    lastName: data.lastName,
+    profilePicture: data.profilePicture,
+  });
+
   return (
-    <div style={{ maxWidth: 1000, margin: '0 auto', padding: '24px 16px', height: 'calc(100vh - 80px)' }}>
+    <div style={{ maxWidth: 1040, margin: '0 auto', padding: '16px', height: 'calc(100vh - 85px)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
       <div style={{
-        display: 'flex', height: '100%', background: 'var(--bg-card)',
+        display: 'flex', flex: 1, minHeight: 0, background: 'var(--bg-card)',
         borderRadius: 16, border: '1px solid var(--border)', overflow: 'hidden'
       }}>
         {/* Sidebar - Inbox */}
@@ -113,7 +134,7 @@ export default function MessagesPage() {
                 background: String(userId) === String(item.userId) ? 'var(--bg-hover)' : 'transparent',
                 transition: 'background 0.2s'
               }}>
-                <AvatarInitials firstName={item.firstName} lastName={item.lastName} size={42} />
+                <AvatarInitials user={makeAvatarUser(item)} size={42} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-primary)' }}>
@@ -144,12 +165,23 @@ export default function MessagesPage() {
         </div>
 
         {/* Chat Area */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
           {!userId ? (
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', color: 'var(--text-muted)' }}>
               <MessageCircle size={64} style={{ opacity: 0.2, marginBottom: 16 }} />
               <p style={{ fontSize: 18, fontWeight: 600 }}>Select a conversation</p>
               <p style={{ fontSize: 14 }}>or start a new one from someone's profile</p>
+            </div>
+          ) : isSelf ? (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, textAlign: 'center', color: 'var(--text-muted)' }}>
+              <MessageCircle size={48} style={{ opacity: 0.3, marginBottom: 12 }} />
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>This is your own profile</h3>
+              <p style={{ fontSize: 14, maxWidth: 380, lineHeight: 1.5, margin: 0 }}>
+                You cannot message yourself. Connect with alumni in the Alumni directory or click <strong>Ask Referral</strong> on any job post to start chatting!
+              </p>
+              <Link to="/alumni" className="btn btn-primary btn-sm" style={{ marginTop: 16 }}>
+                Browse Alumni Directory
+              </Link>
             </div>
           ) : (
             <>
@@ -157,10 +189,10 @@ export default function MessagesPage() {
               {chatUser && (
                 <div style={{
                   padding: '12px 20px', borderBottom: '1px solid var(--border)',
-                  display: 'flex', alignItems: 'center', gap: 12
+                  display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0
                 }}>
                   <Link to={`/profile/${chatUser.id}`} style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
-                    <AvatarInitials firstName={chatUser.firstName} lastName={chatUser.lastName} size={38} />
+                    <AvatarInitials user={chatUser} size={38} />
                     <div>
                       <h4 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>
                         {chatUser.firstName} {chatUser.lastName}
@@ -174,7 +206,7 @@ export default function MessagesPage() {
               )}
 
               {/* Messages */}
-              <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {messages.length === 0 ? (
                   <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
                     <p>Start a conversation with {chatUser?.firstName}!</p>
@@ -205,24 +237,67 @@ export default function MessagesPage() {
                 <div ref={messagesEndRef} />
               </div>
 
+              {/* Quick Icebreakers */}
+              <div style={{
+                padding: '8px 16px', background: 'var(--bg-secondary)', borderTop: '1px solid var(--border)',
+                display: 'flex', gap: 6, overflowX: 'auto', alignItems: 'center'
+              }}>
+                <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>💡 Quick icebreakers:</span>
+                {[
+                  "Hi! Would love to connect and learn about your role.",
+                  "Great seeing you here! Open for a quick coffee chat?",
+                  "Could you share any advice for breaking into your company?",
+                  "Congratulations on your recent achievements!"
+                ].map((prompt, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      setNewMessage(prompt);
+                    }}
+                    style={{
+                      background: 'var(--bg-card)', border: '1px solid var(--border)',
+                      borderRadius: 12, padding: '4px 10px', fontSize: 11, color: 'var(--text-secondary)',
+                      cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s ease'
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--accent)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
+
               {/* Message Input */}
               <form onSubmit={handleSend} style={{
                 padding: '12px 16px', borderTop: '1px solid var(--border)',
-                display: 'flex', gap: 8
+                display: 'flex', gap: 8, flexShrink: 0, background: 'var(--bg-card)'
               }}>
                 <input
+                  id="chat-message-input"
                   type="text"
                   value={newMessage}
                   onChange={e => setNewMessage(e.target.value)}
-                  placeholder="Type a message..."
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSend(e);
+                    }
+                  }}
+                  placeholder="Type a message or pick an icebreaker..."
                   style={{
                     flex: 1, padding: '10px 16px', border: '1px solid var(--border)',
                     borderRadius: 24, fontSize: 14, background: 'var(--bg-primary)',
                     color: 'var(--text-primary)', outline: 'none'
                   }}
                 />
-                <button type="submit" className="btn btn-primary" disabled={sending || !newMessage.trim()}
-                  style={{ borderRadius: 24, padding: '10px 20px', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <button
+                  id="chat-send-btn"
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={sending || !newMessage.trim()}
+                  style={{ borderRadius: 24, padding: '10px 20px', display: 'flex', alignItems: 'center', gap: 6 }}
+                >
                   <Send size={16} />
                 </button>
               </form>

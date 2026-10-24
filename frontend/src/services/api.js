@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = 'http://localhost:8080/api';
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
 
 const api = axios.create({
   baseURL: API_BASE,
@@ -31,6 +31,9 @@ api.interceptors.response.use(
 export const authApi = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
+  googleLogin: (data) => api.post('/auth/google', data),
+  sendOtp: (email) => api.post('/auth/send-otp', { email }),
+  verifyOtp: (email, otp) => api.post('/auth/verify-otp', { email, otp }),
 };
 
 // ========== USERS ==========

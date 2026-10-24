@@ -1,10 +1,26 @@
 import React, { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
   GraduationCap, Home, Users, Shield,
   LogOut, Menu, X, PlusCircle, Briefcase, Zap, FileText, Share2, MessageCircle, UserCheck
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+
+const logoLetterContainer = {
+  rest: {},
+  hover: {
+    transition: { staggerChildren: 0.04 }
+  }
+};
+
+const logoLetterChild = {
+  rest: { y: 0 },
+  hover: {
+    y: -3,
+    transition: { type: 'spring', stiffness: 400, damping: 10 }
+  }
+};
 
 export default function Navbar() {
   const { user, logout, isAdmin, isAuthenticated } = useAuth();
@@ -16,14 +32,21 @@ export default function Navbar() {
     navigate('/login');
   };
 
-  const navItems = [
+  const publicNavItems = [
     { to: '/', label: 'Feed', icon: <Home size={16} /> },
     { to: '/alumni', label: 'Alumni', icon: <Users size={16} /> },
     { to: '/jobs', label: 'Jobs', icon: <Briefcase size={16} /> },
+  ];
+
+  const authNavItems = [
     { to: '/my-network', label: 'Network', icon: <UserCheck size={16} /> },
     { to: '/messages', label: 'Messages', icon: <MessageCircle size={16} /> },
     { to: '/invite', label: 'Invite', icon: <Share2 size={16} /> },
   ];
+
+  const navItems = isAuthenticated 
+    ? [...publicNavItems, ...authNavItems]
+    : publicNavItems;
 
   if (isAdmin) {
     navItems.push({ to: '/admin', label: 'Admin', icon: <Shield size={16} /> });
@@ -33,9 +56,42 @@ export default function Navbar() {
     <>
       <nav className="navbar">
         <div className="navbar-inner">
-          <Link to="/" className="navbar-logo">
-            <GraduationCap size={26} />
-            AlumniConnect
+          <Link
+            to="/"
+            className="navbar-logo"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '10px',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+              textDecoration: 'none',
+            }}
+          >
+            <GraduationCap size={24} style={{ flexShrink: 0, color: 'var(--secondary)' }} />
+            <motion.span
+              variants={logoLetterContainer}
+              initial="rest"
+              whileHover="hover"
+              style={{
+                display: 'inline-flex',
+                whiteSpace: 'nowrap',
+                fontWeight: 800,
+                letterSpacing: '-0.3px',
+                lineHeight: 1,
+                cursor: 'pointer',
+              }}
+            >
+              {Array.from('WE-CONNECT').map((char, idx) => (
+                <motion.span
+                  key={idx}
+                  variants={logoLetterChild}
+                  style={{ display: 'inline-block' }}
+                >
+                  {char}
+                </motion.span>
+              ))}
+            </motion.span>
           </Link>
 
           <ul className="navbar-nav">

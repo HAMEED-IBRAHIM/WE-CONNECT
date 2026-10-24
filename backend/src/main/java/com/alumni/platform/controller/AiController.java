@@ -21,10 +21,23 @@ public class AiController {
     @Autowired
     private UserRepository userRepository;
 
+    private User resolveUser(UserDetails userDetails) {
+        if (userDetails == null) return null;
+        if (userDetails instanceof com.alumni.platform.security.UserDetailsImpl impl) {
+            return userRepository.findById(impl.getId()).orElse(null);
+        }
+        return userRepository.findByEmail(userDetails.getUsername())
+                .orElseGet(() -> userRepository.findByUsername(userDetails.getUsername()).orElse(null));
+    }
+
     @GetMapping("/icebreaker/{recipientId}")
     public ResponseEntity<?> getIcebreaker(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long recipientId) {
-        User sender = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
-        User recipient = userRepository.findById(recipientId).orElseThrow();
+        User sender = resolveUser(userDetails);
+        User recipient = userRepository.findById(recipientId).orElse(null);
+
+        if (sender == null || recipient == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Hi there, great to connect with you!"));
+        }
 
         String message = aiService.generateIcebreaker(
             sender.getBio() != null ? sender.getBio() : "Professional", 

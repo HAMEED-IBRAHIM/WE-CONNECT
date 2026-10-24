@@ -1,227 +1,240 @@
-# 🎓 AlumniConnect — Alumni Networking Platform
+<h1 align="center">
+  🎓 WE-CONNECT
+</h1>
 
-A full-stack Alumni Networking Platform built with **React**, **Spring Boot**, **PostgreSQL**, and **JWT** authentication.
+<p align="center">
+  <b>An Alumni & Student Networking Platform — Built from scratch by a single developer.</b><br/>
+  Connect, collaborate, and grow together.
+</p>
 
----
-
-## 🏗️ Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 18, React Router v6, Axios |
-| Backend | Spring Boot 3.2, Spring Security |
-| Database | PostgreSQL 15+ |
-| Auth | JWT (JJWT 0.12) |
-| ORM | Spring Data JPA / Hibernate |
-| Build | Maven (backend), npm (frontend) |
-
----
-
-## 🚀 Features
-
-### 🔐 Authentication & Authorization
-- JWT-based stateless authentication
-- Role-based access: **Student**, **Alumni**, **Admin**
-- Register / Login with email or username
-- Route guards on both frontend and backend
-
-### 👤 Profiles
-- Rich profile with bio, company, department, graduation year, LinkedIn
-- Profile picture support
-- Edit own profile inline
-
-### 📝 Posts
-- Create, edit, delete posts (with ownership enforcement)
-- Image attachments via URL
-- Tag system with `#hashtag` pills
-- Server-side pagination (10 per page)
-- Full-text search across title, content, tags
-
-### 💬 Comments & Likes
-- Nested comment replies (2-level deep)
-- Like toggle for posts and comments
-- Real-time counts
-- Paginated root comments
-
-### ✅ Alumni Verification Workflow
-```
-Alumni → Submit Document URL → PENDING
-Admin → Review → APPROVED / REJECTED
-Alumni profile shows verified badge (✓)
-```
-
-### 🛡️ Admin Dashboard
-- Platform-wide statistics
-- Pending verification queue with approve/reject
-- User management with delete capability
-- Search across all users
+<p align="center">
+  <img src="https://img.shields.io/badge/Spring_Boot-3.2-brightgreen?style=for-the-badge&logo=spring" />
+  <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react" />
+  <img src="https://img.shields.io/badge/PostgreSQL-15-336791?style=for-the-badge&logo=postgresql" />
+  <img src="https://img.shields.io/badge/JWT-Auth-orange?style=for-the-badge&logo=jsonwebtokens" />
+  <img src="https://img.shields.io/badge/Deployed_on-Vercel_%2B_Railway-black?style=for-the-badge&logo=vercel" />
+</p>
 
 ---
 
-## ⚙️ Setup & Running
+## 👋 About This Project
+
+WE-CONNECT is a full-stack alumni networking platform I built entirely on my own — from database design to UI animations. The idea is simple: **bring students, alumni, and recruiters together in one place** where real connections happen.
+
+It's not just a CRUD app. It has:
+- 🔐 Real authentication with JWT + Google Sign-In
+- 📧 Email OTP verification (powered by Resend)
+- 🛡️ Admin dashboard with verification workflows
+- 💬 Posts, comments, likes, job listings
+- 📄 Resume builder
+- 🎨 A premium dark-mode UI with glassmorphism & animations
+- 🚀 Production-ready with Docker + PostgreSQL
+
+I built this to solve a real problem — most alumni platforms feel cold and corporate. WE-CONNECT feels alive.
+
+---
+
+## ✨ Features at a Glance
+
+| Feature | Details |
+|---------|---------|
+| 🔐 **Auth** | Email+Password, Google OAuth, OTP email verification |
+| 👤 **Profiles** | Bio, company, department, graduation year, profile picture |
+| 📝 **Feed** | Create posts with tags, images, hashtags. Search & filter |
+| 💬 **Social** | Comments, replies, likes, real-time counts |
+| 🤝 **Network** | Connect with alumni, find mentors |
+| 💼 **Jobs** | Post & apply for jobs, filter by type & location |
+| 📄 **Resume Builder** | ATS-ready resume builder built-in |
+| 🛡️ **Admin Panel** | Stats, verification queue, user management |
+| 📧 **Emails** | OTP emails, announcements via Resend SMTP |
+| 🔒 **Security** | BCrypt, JWT, role-based access (Student/Alumni/Admin) |
+
+---
+
+## 🛠️ Tech Stack
+
+### Backend
+- **Spring Boot 3.2** — REST API
+- **Spring Security** — JWT auth + role-based access
+- **Spring Data JPA + Hibernate** — ORM
+- **PostgreSQL** (production) / H2 (local dev)
+- **Spring Mail** → Resend SMTP for emails
+- **Lombok** — cleaner Java code
+- **Maven** — build tool
+
+### Frontend
+- **React 19** — UI framework
+- **React Router v6** — SPA routing
+- **Axios** — HTTP client
+- **Framer Motion** — animations
+- **Lucide React** — icons
+- **React Hot Toast** — notifications
+- **Google OAuth** via `@react-oauth/google`
+
+### DevOps
+- **Docker** — containerized backend
+- **Vercel** — frontend hosting
+- **Railway** — backend hosting
+- **Neon / Supabase** — managed PostgreSQL
+
+---
+
+## 🚀 Getting Started (Local Dev)
 
 ### Prerequisites
 - Java 17+
 - Node.js 18+
-- PostgreSQL 15+
 - Maven 3.8+
 
----
-
-### 1. Database Setup
-
+### 1. Clone the repo
 ```bash
-# In psql
-CREATE DATABASE alumni_db;
+git clone https://github.com/YOUR_USERNAME/WE-CONNECT.git
+cd WE-CONNECT
 ```
-
-Then update credentials in `backend/src/main/resources/application.properties`:
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/alumni_db
-spring.datasource.username=postgres
-spring.datasource.password=your_password
-```
-
----
 
 ### 2. Start the Backend
+The backend uses an **H2 file database** locally — no PostgreSQL installation needed!
 
 ```bash
 cd backend
 mvn spring-boot:run
 ```
 
-Backend runs on: **http://localhost:8080/api**
+Backend runs at: **http://localhost:8080/api**
 
-After the first start, create the admin user:
-```bash
-psql -d alumni_db -f ../database/setup.sql
-```
-Admin credentials: `admin@alumniplatform.com` / `admin123`
+> First run automatically seeds demo users (Priya Sharma @ Google, Rahul Verma @ Microsoft, admin account, etc.)
 
----
+**Demo Accounts:**
+| Role | Email | Password |
+|------|-------|----------|
+| 🛡️ Admin | `admin@weconnect.com` | `admin123` |
+| 👩‍💻 Alumni | `priya.sharma@gmail.com` | `password` |
+| 📊 Alumni | `rahul.verma@gmail.com` | `password` |
 
 ### 3. Start the Frontend
-
 ```bash
 cd frontend
+npm install
 npm start
 ```
 
-Frontend runs on: **http://localhost:3000**
+Frontend runs at: **http://localhost:3000**
+
+Or just double-click `START_ALL.bat` (Windows) to start both at once! 🎉
 
 ---
 
-## 📡 REST API Reference
+## 🗄️ Connecting to a Real Database (Neon or Supabase)
 
-### Auth
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| POST | `/api/auth/register` | Public | Register new user |
-| POST | `/api/auth/login` | Public | Login, returns JWT |
+The local dev setup uses H2 (no install needed). For production or if you want a real cloud PostgreSQL, follow these steps:
 
-### Users
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| GET | `/api/users/{id}` | Public | Get user profile |
-| GET | `/api/users/search?query=&role=&page=&size=` | Public | Search users |
-| GET | `/api/users/me` | 🔒 Any | Get current user |
-| PUT | `/api/users/me` | 🔒 Any | Update profile |
-| POST | `/api/users/me/submit-verification` | 🔒 Alumni | Submit verification |
+### Option A — Neon (Recommended, Free)
 
-### Posts
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| GET | `/api/posts?query=&page=&size=` | Public | Get/search posts |
-| GET | `/api/posts/{id}` | Public | Get single post |
-| GET | `/api/posts/user/{userId}` | Public | Get user's posts |
-| POST | `/api/posts` | 🔒 Any | Create post |
-| PUT | `/api/posts/{id}` | 🔒 Owner | Update post |
-| DELETE | `/api/posts/{id}` | 🔒 Owner/Admin | Delete post |
+1. Go to **[neon.tech](https://neon.tech)** and sign up
+2. Create a new project → call it `we-connect`
+3. Go to your project dashboard → **Connection Details**
+4. Copy the **JDBC connection string** (looks like):
+   ```
+   jdbc:postgresql://ep-cool-name-123456.us-east-2.aws.neon.tech/neondb?sslmode=require
+   ```
+5. Create a file `backend/src/main/resources/application-local-pg.properties`:
+   ```properties
+   spring.datasource.url=jdbc:postgresql://YOUR_NEON_HOST/neondb?sslmode=require
+   spring.datasource.username=YOUR_NEON_USER
+   spring.datasource.password=YOUR_NEON_PASSWORD
+   spring.datasource.driver-class-name=org.postgresql.Driver
+   spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+   spring.h2.console.enabled=false
+   ```
+6. Run with the profile:
+   ```bash
+   mvn spring-boot:run -Dspring-boot.run.profiles=local-pg
+   ```
 
-### Comments
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| GET | `/api/posts/{postId}/comments?page=&size=` | Public | Get comments |
-| POST | `/api/posts/{postId}/comments` | 🔒 Any | Add comment/reply |
-| PUT | `/api/comments/{id}` | 🔒 Owner | Edit comment |
-| DELETE | `/api/comments/{id}` | 🔒 Owner/Admin | Delete comment |
+### Option B — Supabase (Also Free)
 
-### Likes
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| POST | `/api/likes/posts/{postId}` | 🔒 Any | Toggle post like |
-| POST | `/api/likes/comments/{commentId}` | 🔒 Any | Toggle comment like |
+1. Go to **[supabase.com](https://supabase.com)** and create a project
+2. Go to **Project Settings → Database**
+3. Copy the **Connection string** (URI format)
+4. Same steps as Neon above — just use `?sslmode=require` at the end of your JDBC URL
 
-### Admin (ROLE_ADMIN only)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/admin/stats` | Platform statistics |
-| GET | `/api/admin/verifications/pending` | Pending verifications |
-| PATCH | `/api/admin/verifications/{userId}` | Approve/reject verification |
-| GET | `/api/admin/users` | All users with search |
-| DELETE | `/api/admin/users/{userId}` | Delete user |
+> ✅ Both Neon and Supabase work perfectly with Spring Boot. The app auto-creates all tables on first run (`ddl-auto=update`).
+
+---
+
+## ☁️ Production Deployment
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for the complete step-by-step guide for:
+- **Vercel** (frontend)
+- **Railway** (backend)
+- **Neon/Supabase** (database)
 
 ---
 
 ## 📁 Project Structure
 
 ```
-ALUMINI/
-├── backend/                    # Spring Boot
-│   └── src/main/java/com/alumni/platform/
-│       ├── model/              # JPA Entities
-│       │   ├── User.java
-│       │   ├── Post.java
-│       │   ├── Comment.java
-│       │   ├── Like.java
-│       │   ├── Role.java (enum)
-│       │   └── VerificationStatus.java (enum)
-│       ├── repository/         # Spring Data JPA Repos
-│       ├── service/            # Business logic
-│       ├── controller/         # REST endpoints
-│       ├── dto/                # Request/Response DTOs
-│       ├── security/           # JWT + Spring Security
-│       ├── config/             # SecurityConfig, CORS
-│       └── exception/          # GlobalExceptionHandler
+WE-CONNECT/
+├── backend/                          # Spring Boot API
+│   ├── Dockerfile                    # For Railway deployment
+│   └── src/main/
+│       ├── java/com/alumni/platform/
+│       │   ├── config/               # Security, CORS, DataSeeder
+│       │   ├── controller/           # REST endpoints
+│       │   ├── dto/                  # Request/Response objects
+│       │   ├── exception/            # Global error handling
+│       │   ├── model/                # JPA entities
+│       │   ├── repository/           # Spring Data repos
+│       │   ├── security/             # JWT filter & utils
+│       │   └── service/              # Business logic
+│       └── resources/
+│           ├── application.properties        # Local dev (H2)
+│           └── application-prod.properties   # Production (PostgreSQL)
 │
-├── frontend/                   # React 18
+├── frontend/                         # React 19 App
+│   ├── vercel.json                   # Vercel SPA routing config
 │   └── src/
-│       ├── context/            # AuthContext (JWT state)
-│       ├── services/           # api.js (Axios client)
-│       ├── components/         # Navbar, PostCard, UserCard, CommentSection
-│       └── pages/
-│           ├── FeedPage         (home, search, pagination)
-│           ├── LoginPage
-│           ├── RegisterPage     (role selector)
-│           ├── ProfilePage      (edit, verification submit)
-│           ├── PostDetailPage   (full post + comments)
-│           ├── CreateEditPostPage
-│           ├── UsersListPage    (alumni + students)
-│           └── AdminPage        (dashboard + workflow)
+│       ├── context/                  # AuthContext (JWT state)
+│       ├── services/                 # api.js (Axios client)
+│       ├── components/               # Reusable UI components
+│       └── pages/                    # All page views
 │
-└── database/
-    └── setup.sql               # DB init + admin user seed
+├── .gitignore
+├── START_ALL.bat                     # One-click local startup (Windows)
+└── README.md
 ```
 
 ---
 
-## 🔒 Security Details
+## 🔒 Environment Variables
 
-- Passwords hashed with BCrypt
-- JWT secret configured in `application.properties`
-- CORS restricted to `http://localhost:3000`
-- `@PreAuthorize` annotations enforce role rules at method level
-- Global exception handler returns structured JSON errors
+### Backend (set in Railway or `.env`)
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | PostgreSQL JDBC URL |
+| `DATABASE_USERNAME` | DB username |
+| `DATABASE_PASSWORD` | DB password |
+| `JWT_SECRET` | 64-char hex secret for signing tokens |
+| `RESEND_API_KEY` | From [resend.com](https://resend.com) |
+| `GOOGLE_CLIENT_ID` | From Google Cloud Console |
+| `CORS_ORIGINS` | Your Vercel frontend URL |
+
+### Frontend (set in Vercel or `.env`)
+| Variable | Description |
+|----------|-------------|
+| `REACT_APP_API_URL` | Your Railway backend URL + `/api` |
+| `REACT_APP_GOOGLE_CLIENT_ID` | Google OAuth Client ID |
 
 ---
 
-## 🎨 UI Features
+## 👨‍💻 About the Developer
 
-- **Dark Mode** design system with CSS custom properties
-- **Glassmorphism** navbar with blur effect
-- **Gradient** role-specific profile cards
-- **Micro-animations** (hover, slide-in, shimmer skeleton)
-- **Responsive** grid layout
-- Server-side **paginated** post and user listings
-- **Real-time** like toggling with optimistic updates
+Built solo by **Ibrahim Hameed** — a passionate developer who loves building things that actually work and look great doing it.
+
+> "I didn't just want to build another CRUD app. I wanted WE-CONNECT to feel like a real platform that people would actually enjoy using."
+
+---
+
+## 📄 License
+
+MIT License — feel free to use, fork, and build on top of this.

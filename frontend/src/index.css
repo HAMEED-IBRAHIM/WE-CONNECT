@@ -130,9 +130,10 @@ a:hover { color: var(--primary); }
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1360px;
   margin: 0 auto;
   padding: 0 var(--space-lg);
+  gap: var(--space-md);
 }
 
 .navbar-logo {
@@ -145,26 +146,31 @@ a:hover { color: var(--primary); }
   color: #ffffff;
   text-decoration: none;
   letter-spacing: -0.5px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.navbar-logo svg { color: var(--secondary); }
+.navbar-logo svg { color: var(--secondary); flex-shrink: 0; }
 
 .navbar-nav {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
+  gap: 4px;
   list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .nav-link {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 14px;
+  padding: 8px 12px;
   border-radius: var(--radius-md);
   color: #e2e8f0;
   font-weight: 500;
   font-size: 14px;
+  white-space: nowrap;
   transition: all var(--transition);
   text-decoration: none;
 }
@@ -174,7 +180,13 @@ a:hover { color: var(--primary); }
   color: #ffffff;
 }
 
-.navbar-actions { display: flex; align-items: center; gap: var(--space-sm); }
+.navbar-actions { 
+  display: flex; 
+  align-items: center; 
+  gap: var(--space-sm); 
+  flex-shrink: 0;
+  white-space: nowrap;
+}
 
 /* =================== BUTTONS =================== */
 .btn {

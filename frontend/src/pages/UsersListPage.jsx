@@ -102,6 +102,34 @@ export default function UsersListPage({ roleFilter }) {
           </div>
         </div>
 
+        {/* Quick Company Filter Chips */}
+        {isAlumniPage && (
+          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 24, paddingBottom: 4 }}>
+            {['All', 'Google', 'Microsoft', 'Netflix', 'Swiggy', 'Amazon', 'Flipkart', 'Deloitte', 'HealthTech AI'].map(company => (
+              <button
+                key={company}
+                type="button"
+                onClick={() => {
+                  const q = company === 'All' ? '' : company;
+                  setSearch(q);
+                  setSearchInput(q);
+                  setPage(0);
+                }}
+                style={{
+                  padding: '6px 14px', borderRadius: 999, border: '1px solid',
+                  fontSize: 12, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap',
+                  borderColor: (search === company || (company === 'All' && !search)) ? 'var(--primary)' : 'var(--border)',
+                  background: (search === company || (company === 'All' && !search)) ? 'var(--primary)' : 'transparent',
+                  color: (search === company || (company === 'All' && !search)) ? '#fff' : 'var(--text-secondary)',
+                  transition: 'all 0.2s',
+                }}
+              >
+                {company}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Results info */}
         {search && (
           <div style={{ marginBottom: 16, fontSize: 14, color: 'var(--text-muted)' }}>

@@ -79,6 +79,7 @@ public class JobService {
         authorInfo.setFullName(a.getFullName());
         authorInfo.setCompany(a.getCompany());
         authorInfo.setJobTitle(a.getJobTitle());
+        authorInfo.setProfilePicture(a.getProfilePicture());
         dto.setAuthor(authorInfo);
 
         return dto;

@@ -68,16 +68,12 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Public endpoints
+                // Only auth and uploaded assets are public; everything else requires login
                 .requestMatchers("/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/posts/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/jobs/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/users/search").permitAll()
-                .requestMatchers(HttpMethod.GET, "/users/{id}").permitAll()
                 .requestMatchers("/uploads/**").permitAll()
                 // Admin-only
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                // All other endpoints require authentication
+                // All other endpoints strictly require authentication
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())

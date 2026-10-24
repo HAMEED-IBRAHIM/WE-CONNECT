@@ -2,9 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   Briefcase, MapPin, GraduationCap, Link2,
-  CheckCircle, Clock, XCircle, Edit2, Upload, AlertCircle
+  CheckCircle, Clock, XCircle, Edit2, Upload, AlertCircle,
+  UserPlus, MessageCircle, Sparkles, Check
 } from 'lucide-react';
-import { usersApi, postsApi } from '../services/api';
+import { usersApi, postsApi, connectionsApi, aiApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import PostCard from '../components/PostCard';
 import { AvatarInitials } from '../components/Navbar';
@@ -33,6 +34,10 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('posts');
   const [docUrl, setDocUrl] = useState('');
   const [submittingDoc, setSubmittingDoc] = useState(false);
+  const [connStatus, setConnStatus] = useState('NONE');
+  const [connLoading, setConnLoading] = useState(false);
+  const [isRequester, setIsRequester] = useState(false);
+  const [connId, setConnId] = useState(null);
 
   const isOwner = currentUser?.id === parseInt(id);
 
@@ -50,12 +55,20 @@ export default function ProfilePage() {
         linkedInUrl: data.linkedInUrl || '',
         location: data.location || '',
       });
+
+      if (currentUser && currentUser.id !== parseInt(id)) {
+        connectionsApi.getStatus(id).then(res => {
+          setConnStatus(res.data.status);
+          setIsRequester(res.data.isRequester);
+          setConnId(res.data.connectionId);
+        }).catch(() => {});
+      }
     } catch {
       toast.error('User not found');
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, currentUser]);
 
   const loadPosts = useCallback(async (page = 0) => {
     setPostsLoading(true);
@@ -101,6 +114,37 @@ export default function ProfilePage() {
       toast.error('Submission failed');
     } finally {
       setSubmittingDoc(false);
+    }
+  };
+
+  const handleConnect = async () => {
+    if (!currentUser) {
+      toast('Please sign in to connect', { icon: '🔒' });
+      return;
+    }
+    if (connStatus === 'NONE') {
+      try {
+        setConnLoading(true);
+        await connectionsApi.sendRequest(id);
+        setConnStatus('PENDING');
+        setIsRequester(true);
+        toast.success('Connection request sent!');
+      } catch {
+        toast.error('Failed to send request');
+      } finally {
+        setConnLoading(false);
+      }
+    } else if (connStatus === 'PENDING' && !isRequester) {
+      try {
+        setConnLoading(true);
+        await connectionsApi.acceptRequest(connId);
+        setConnStatus('ACCEPTED');
+        toast.success('Connection accepted!');
+      } catch {
+        toast.error('Failed to accept request');
+      } finally {
+        setConnLoading(false);
+      }
     }
   };
 
@@ -157,13 +201,38 @@ export default function ProfilePage() {
               </div>
               <div style={{ color: 'var(--text-secondary)', fontSize: 14 }}>@{profile.username}</div>
             </div>
-            {isOwner && (
+            {isOwner ? (
               <button
                 className="btn btn-secondary"
                 onClick={() => setEditing(!editing)}
               >
                 <Edit2 size={15} /> {editing ? 'Cancel' : 'Edit Profile'}
               </button>
+            ) : (
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                <button
+                  className={`btn ${connStatus === 'ACCEPTED' ? 'btn-secondary' : connStatus === 'PENDING' ? 'btn-secondary' : 'btn-primary'}`}
+                  onClick={handleConnect}
+                  disabled={connLoading || (connStatus === 'PENDING' && isRequester) || connStatus === 'ACCEPTED'}
+                  style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+                >
+                  {connStatus === 'ACCEPTED' ? (
+                    <><Check size={16} /> Connected</>
+                  ) : connStatus === 'PENDING' ? (
+                    isRequester ? <><Clock size={16} /> Pending</> : <><Check size={16} /> Accept Request</>
+                  ) : (
+                    <><UserPlus size={16} /> Connect</>
+                  )}
+                </button>
+
+                <Link
+                  to={`/messages/${id}`}
+                  className="btn btn-primary"
+                  style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+                >
+                  <MessageCircle size={16} /> Message
+                </Link>
+              </div>
             )}
           </div>
 

@@ -80,7 +80,7 @@ const TOURNAMENTS = [
     maxParticipants: 500,
     startDate: '2026-10-08',
     duration: '6 hours',
-    prize: 'Featured on AlumniConnect + Swag',
+    prize: 'Featured on WE-CONNECT + Swag',
     status: 'live',
     difficulty: 'Beginner-friendly',
     color: '#7c3aed',

@@ -23,5 +23,6 @@ public class JobDto {
         private String fullName;
         private String company;
         private String jobTitle;
+        private String profilePicture;
     }
 }

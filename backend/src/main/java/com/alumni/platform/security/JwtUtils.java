@@ -19,7 +19,7 @@ public class JwtUtils {
     private String jwtSecret;
 
     @Value("${app.jwt.expiration-ms}")
-    private int jwtExpirationMs;
+    private long jwtExpirationMs;
 
     private SecretKey key() {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));

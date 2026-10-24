@@ -20,6 +20,9 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     @Query("SELECT COUNT(m) FROM Message m WHERE m.recipient = :user AND m.read = false")
     long countUnreadMessages(User user);
 
-    @Query("SELECT DISTINCT CASE WHEN m.sender = :user THEN m.recipient ELSE m.sender END FROM Message m WHERE m.sender = :user OR m.recipient = :user")
-    List<User> findConversationPartners(User user);
+    @Query("SELECT DISTINCT m.recipient FROM Message m WHERE m.sender = :user")
+    List<User> findRecipientsByUser(User user);
+
+    @Query("SELECT DISTINCT m.sender FROM Message m WHERE m.recipient = :user")
+    List<User> findSendersByUser(User user);
 }

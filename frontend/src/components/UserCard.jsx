@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Briefcase, MapPin, GraduationCap, CheckCircle, Clock, UserPlus, Check, Sparkles } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Briefcase, MapPin, GraduationCap, CheckCircle, Clock, UserPlus, Check, Sparkles, MessageCircle } from 'lucide-react';
 import { AvatarInitials } from './Navbar';
 import { connectionsApi, aiApi } from '../services/api';
 import toast from 'react-hot-toast';
@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext';
 
 export default function UserCard({ user }) {
   const { user: currentUser } = useAuth();
+  const navigate = useNavigate();
   const [connStatus, setConnStatus] = useState('NONE');
   const [loading, setLoading] = useState(true);
   const [aiLoading, setAiLoading] = useState(false);
@@ -36,7 +37,11 @@ export default function UserCard({ user }) {
   const handleConnect = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!currentUser) return;
+    if (!currentUser) {
+      toast('Please sign in to connect with alumni', { icon: '🔒' });
+      navigate('/login');
+      return;
+    }
     
     if (connStatus === 'NONE') {
       try {
@@ -159,25 +164,36 @@ export default function UserCard({ user }) {
           )}
 
           <div style={{ marginTop: 16, display: 'flex', gap: '8px' }}>
-            {currentUser && currentUser.id !== user.id && !loading && (
+            {(!currentUser || currentUser.id !== user.id) && !loading && (
               <>
                 <button 
                   className={`btn ${connStatus === 'ACCEPTED' ? 'btn-secondary' : connStatus === 'PENDING' ? 'btn-secondary' : 'btn-primary'}`} 
                   style={{ 
-                    flex: 1, padding: '6px 0', fontSize: 14, 
+                    flex: 1, padding: '6px 0', fontSize: 13, 
                     display: 'flex', alignItems: 'center', justifyContent: 'center' 
                   }}
                   onClick={handleConnect}
                   disabled={loading || (connStatus === 'PENDING' && isRequester) || connStatus === 'ACCEPTED'}
                 >
                   {connStatus === 'ACCEPTED' ? (
-                    <><Check size={16} style={{marginRight: 6}}/> Connected</>
+                    <><Check size={15} style={{marginRight: 6}}/> Connected</>
                   ) : connStatus === 'PENDING' ? (
                     isRequester ? 'Pending' : 'Accept'
                   ) : (
-                    <><UserPlus size={16} style={{marginRight: 6}}/> Connect</>
+                    <><UserPlus size={15} style={{marginRight: 6}}/> Connect</>
                   )}
                 </button>
+
+                {connStatus === 'ACCEPTED' && (
+                  <Link
+                    to={`/messages/${user.id}`}
+                    className="btn btn-primary"
+                    style={{ padding: '6px 14px', fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}
+                    onClick={e => e.stopPropagation()}
+                  >
+                    <MessageCircle size={15} /> Message
+                  </Link>
+                )}
 
                 {connStatus === 'NONE' && (
                   <button 

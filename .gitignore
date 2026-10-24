@@ -1,0 +1,39 @@
+# =============================================
+# WE-CONNECT .gitignore
+# =============================================
+
+# Java / Maven
+backend/target/
+backend/data/
+backend/*.jar
+backend/.mvn/
+
+# Node / React
+frontend/node_modules/
+frontend/build/
+
+# Environment files (contain secrets!)
+.env
+.env.local
+.env.production
+frontend/.env.local
+frontend/.env.production
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Uploads
+backend/uploads/
+
+# Logs
+*.log
