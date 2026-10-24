@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, Shield } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Mail, Lock, Eye, EyeOff, Shield, Zap } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
-import { authApi } from '../services/api';
+import { authApi, pingBackend, startKeepAlive } from '../services/api';
 import toast from 'react-hot-toast';
 
 // ─── Google SVG Icon ──────────────────────────────────────────────────────────
@@ -80,6 +80,17 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [serverWarm, setServerWarm] = useState(null); // null=checking, true=warm, false=cold
+
+  // Pre-warm the backend as soon as the login page loads
+  useEffect(() => {
+    const t0 = Date.now();
+    pingBackend().then(() => {
+      const ms = Date.now() - t0;
+      setServerWarm(ms < 4000); // >4 s = was cold
+    }).catch(() => setServerWarm(false));
+    startKeepAlive(); // keep pinging every 9 min from now on
+  }, []);
 
   // ─── Google Sign-In ────────────────────────────────────────────────────────
   const handleGoogleSuccess = async (tokenResponse) => {
@@ -192,6 +203,31 @@ export default function LoginPage() {
             Sign in to your account
           </motion.p>
         </motion.div>
+
+        {/* ── Cold-start banner ── */}
+        <AnimatePresence>
+          {serverWarm === false && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                background: 'rgba(251,191,36,0.12)',
+                border: '1px solid rgba(251,191,36,0.4)',
+                borderRadius: 10, padding: '10px 14px',
+                marginBottom: 14, fontSize: 13,
+                color: '#92400e',
+              }}
+            >
+              <Zap size={14} style={{ color: '#d97706', flexShrink: 0 }} />
+              <span>
+                <strong>Server waking up…</strong> The backend was asleep on Render's free tier.
+                First request takes ~30 s — please wait a moment before signing in.
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* ── Card ── */}
         <motion.div

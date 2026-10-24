@@ -46,4 +46,11 @@ public class AuthController {
     public ResponseEntity<AuthResponse> googleLogin(@RequestBody Map<String, String> body) {
         return ResponseEntity.ok(authService.googleLogin(body));
     }
+
+    // ─── Health / Keep-Alive ───────────────────────────────────────────────────
+    // Called by the frontend every 10 min to prevent Render free-tier cold starts
+    @GetMapping("/ping")
+    public ResponseEntity<Map<String, String>> ping() {
+        return ResponseEntity.ok(Map.of("status", "ok", "service", "WE-CONNECT"));
+    }
 }

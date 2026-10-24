@@ -21,6 +21,10 @@ import ResumeBuilderPage from './pages/ResumeBuilderPage';
 import MyNetworkPage from './pages/MyNetworkPage';
 import MessagesPage from './pages/MessagesPage';
 import InvitePage from './pages/InvitePage';
+import { startKeepAlive } from './services/api';
+
+// Start pinging the backend immediately to prevent Render cold starts
+startKeepAlive();
 
 // ─── Full spinner while auth loads ───────────────────────────────────────────
 function AuthLoader() {

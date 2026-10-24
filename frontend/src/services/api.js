@@ -1,6 +1,17 @@
 import axios from 'axios';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+export const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+
+// ─── Keep-Alive: ping backend every 9 min to prevent Render cold starts ───────
+export const pingBackend = () =>
+  fetch(`${API_BASE}/auth/ping`, { method: 'GET' }).catch(() => {});
+
+let _keepAliveTimer = null;
+export const startKeepAlive = () => {
+  if (_keepAliveTimer) return; // already running
+  pingBackend(); // ping immediately on first call
+  _keepAliveTimer = setInterval(pingBackend, 9 * 60 * 1000); // then every 9 min
+};
 
 const api = axios.create({
   baseURL: API_BASE,
